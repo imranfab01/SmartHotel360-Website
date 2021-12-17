@@ -1,18 +1,19 @@
-# ASP.NET
-# Build and test ASP.NET projects.
-# Add steps that publish symbols, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
-
-trigger:
-- master
-
 pool:
-  vmImage: 'windows-latest'
+  name: Imran
+  demands:
+  - msbuild
+  - visualstudio
+  - vstest
 
-variables:
-  solution: '**/*.sln'
- 
- 
+#Your build pipeline references an undefined variable named ‘Parameters.solution’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+#Your build pipeline references an undefined variable named ‘Parameters.solution’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+#Your build pipeline references the ‘BuildPlatform’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
+#Your build pipeline references the ‘BuildConfiguration’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
+#Your build pipeline references the ‘BuildConfiguration’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
+#Your build pipeline references the ‘BuildPlatform’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
+#Your build pipeline references the ‘BuildConfiguration’ variable, which you’ve selected to be settable at queue time. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab, and then select the option to make it settable at queue time. See https://go.microsoft.com/fwlink/?linkid=865971
+#Your build pipeline references an undefined variable named ‘Parameters.ArtifactName’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
 steps:
 - task: NuGetToolInstaller@0
   displayName: 'Use NuGet 4.4.1'
@@ -24,27 +25,22 @@ steps:
   inputs:
     restoreSolution: '$(Parameters.solution)'
 
-- task: FileTransform@1
-  displayName: 'File Transform: '
-  inputs:
-    folderPath: imran
-    enableXmlTransform: true
-    fileType: xml
-
-- task: qetza.xdttransform.xdttransform-task.xdttransform@3
-  displayName: 'Apply transforms web.release.config => web.config'
-  inputs:
-    workingFolder: imran
-    transforms: 'web.release.config => web.config'
-
 - task: VSBuild@1
   displayName: 'Build solution'
   inputs:
     solution: '$(Parameters.solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package  /p:SkipInvalidConfigurations=true /p:PackageAsSingleFile=true /p:PackageLocation="$(build.artifactstagingdirectory)\\"'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactstagingdirectory)\\"'
     platform: '$(BuildPlatform)'
     configuration: '$(BuildConfiguration)'
-    clean: true
+
+- task: VSTest@2
+  displayName: 'Test Assemblies'
+  inputs:
+    testAssemblyVer2: |
+     **\$(BuildConfiguration)\*test*.dll
+     !**\obj\**
+    platform: '$(BuildPlatform)'
+    configuration: '$(BuildConfiguration)'
 
 - task: PublishSymbols@2
   displayName: 'Publish symbols path'
@@ -60,23 +56,3 @@ steps:
     ArtifactName: '$(Parameters.ArtifactName)'
   condition: succeededOrFailed()
 
- 
-
-
-- task: NuGetToolInstaller@1
-
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
-
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-
-- task: VSTest@2
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'

@@ -60,7 +60,7 @@ steps:
     ArtifactName: '$(Parameters.ArtifactName)'
   condition: succeededOrFailed()
 
-  buildConfiguration: 'Release'
+ 
 
 
 - task: NuGetToolInstaller@1
